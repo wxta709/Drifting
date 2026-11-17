@@ -108,7 +108,9 @@ export interface AgentCancelPendingControlInput {
 }
 
 export type AgentMode = 'oauth' | 'apikey' | 'hosted';
-export type AgentProviderChoice = 'deepseek' | 'anthropic' | 'openai' | 'openai-codex';
+// Fork: 'relay' is an author-added BYOK provider for an OpenAI-compatible
+// relay endpoint (custom base URL + key, chat/completions only).
+export type AgentProviderChoice = 'deepseek' | 'anthropic' | 'openai' | 'openai-codex' | 'relay';
 export type AgentModelChoice = string;
 export type AgentEffortChoice = 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | 'max' | 'ultra';
 export type AgentThinkingChoice = 'adaptive' | 'off';

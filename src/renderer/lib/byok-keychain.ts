@@ -10,7 +10,9 @@
 
 import { platform } from '../platform';
 
-export type BYOKProvider = 'anthropic' | 'openai' | 'deepseek';
+// Fork: 'relay' stores the OpenAI-compatible relay endpoint's key; its base
+// URL is a non-secret setting (settings store), not a keychain value.
+export type BYOKProvider = 'anthropic' | 'openai' | 'deepseek' | 'relay';
 const LEGACY_AGENT_ANTHROPIC_KEY_ID = 'byok.agent.anthropic';
 
 function keyOf(provider: BYOKProvider): string {

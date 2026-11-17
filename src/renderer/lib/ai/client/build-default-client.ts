@@ -10,6 +10,7 @@ import { OpenAIProvider } from './providers/openai';
 import { BYOKCredentialsProvider } from '../credentials/byok';
 import { EnvCredentialsProvider } from '../credentials/env';
 import { ChainCredentialsProvider } from '../credentials/chain';
+import { readRelayBaseURL } from '../relay-endpoint';
 import { LoggingInterceptor } from '../interceptors/logging-interceptor';
 import { CaptureInterceptor } from '../interceptors/capture-interceptor';
 import type { LLMProvider } from './providers/provider';
@@ -76,6 +77,13 @@ function createDirectProvider(provider: BYOKProvider, apiKey: string, model?: st
         apiKey,
         ...(model ? { defaultModel: model } : {}),
       });
+    case 'relay':
+      return new OpenAIProvider({
+        apiKey,
+        ...(model ? { defaultModel: model } : {}),
+        baseURL: readRelayBaseURL(),
+        omitReasoningEffort: true,
+      });
   }
 }
 
@@ -105,6 +113,11 @@ export async function buildGeneralAgentClient(
     new BYOKCredentialsProvider(),
   ]);
   const provider = options.provider ?? 'deepseek';
+  // Fork: 'relay' shares this OpenAI-compatible chat-completions path with
+  // DeepSeek; its base URL comes from the relay endpoint setting.
+  if (provider === 'relay') {
+    return buildDirectRelayClient(options, credentials);
+  }
   if (provider !== 'deepseek') {
     throw new AIError(
       'invalid-input',
@@ -135,6 +148,38 @@ async function buildDirectDeepSeekClient(
       thinking: false,
     }),
     options.logTag ?? 'general-agent',
+  );
+}
+
+async function buildDirectRelayClient(
+  options: BuildDefaultLLMClientOptions,
+  credentials = new ChainCredentialsProvider([
+    new EnvCredentialsProvider(),
+    new BYOKCredentialsProvider(),
+  ]),
+): Promise<LLMClient> {
+  const baseURL = readRelayBaseURL();
+  if (!baseURL) {
+    throw new AIError(
+      'auth',
+      'The relay provider needs a base URL. Set one in Settings → Models & API.',
+    );
+  }
+  const apiKey = await tryGetKey(credentials, 'relay');
+  if (!apiKey) {
+    throw new AIError(
+      'auth',
+      'No relay key is configured for General Agent. Add one in Settings → Models & API.',
+    );
+  }
+  return wrapClient(
+    new OpenAIProvider({
+      apiKey,
+      ...(options.model ? { defaultModel: options.model } : {}),
+      baseURL,
+      omitReasoningEffort: true,
+    }),
+    options.logTag ?? 'general-agent-relay',
   );
 }
 

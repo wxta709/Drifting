@@ -44,7 +44,9 @@ describe('General Agent provider contract', () => {
     const providers = AGENT_PROVIDER_OPTIONS.map((provider) => provider.value);
     expect(new Set(providers).size).toBe(providers.length);
     for (const provider of AGENT_PROVIDER_OPTIONS) {
-      expect(provider.models.length).toBeGreaterThan(0);
+      // Fork: the relay's bundled catalog is empty by design — its models come
+      // from the endpoint's own /models list or manual entry.
+      if (provider.value !== 'relay') expect(provider.models.length).toBeGreaterThan(0);
       const models = provider.models.map((model) => model.value);
       expect(new Set(models).size).toBe(models.length);
       for (const model of provider.models) {

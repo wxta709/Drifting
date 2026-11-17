@@ -51,5 +51,8 @@ function envNames(provider: BYOKProvider): string[] {
       return ['VITE_OPENAI_API_KEY'];
     case 'deepseek':
       return ['VITE_DEEPSEEK_AI_API_KEY', 'VITE_DEEPSEEK_API_KEY'];
+    // Fork (relay): dev convenience only, like the other providers.
+    case 'relay':
+      return ['VITE_RELAY_API_KEY'];
   }
 }

@@ -60,11 +60,12 @@ export function agentOnboardingWaitsOnChange(step: AgentOnboardingStep, changedE
   return step === 'change' && changedEntities > 0;
 }
 
-/** Where each provider hands out keys, opened outside Drifting. */
+/** Where each provider hands out keys, opened outside Drifting. Empty for the fork's relay: the author runs that endpoint themselves. */
 export const AGENT_PROVIDER_KEY_PAGES: Record<BYOKProvider, string> = {
   deepseek: 'https://platform.deepseek.com/api_keys',
   anthropic: 'https://console.anthropic.com/settings/keys',
   openai: 'https://platform.openai.com/api-keys',
+  relay: '',
 };
 
 export type AgentStarterPromptKey =

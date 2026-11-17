@@ -95,7 +95,7 @@ describe('API-key provider model lists', () => {
   it('clears every provider list when Settings reports a key change', () => {
     setByokModelCatalog('openai', [model('gpt-6.2-nova')]);
     expect(agentProviderOption('openai').models.map((item) => item.value)).toEqual(['gpt-6.2-nova']);
-    expect(Object.keys(byokModelLists)).toEqual(['deepseek', 'anthropic', 'openai']);
+    expect(Object.keys(byokModelLists)).toEqual(['deepseek', 'anthropic', 'openai', 'relay']);
     events.emit('byok:keys-changed');
     expect(agentProviderOption('openai').models[0]!.value).toBe('gpt-6-astra');
   });

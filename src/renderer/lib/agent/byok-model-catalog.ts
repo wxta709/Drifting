@@ -1,5 +1,7 @@
 import { isTauriRuntime, platform } from '../../platform';
 import type { ByokListedModel, ByokModelCatalogResponse } from '../../platform';
+import { readRelayBaseURL } from '../ai/relay-endpoint';
+import { byokKeychain } from '../byok-keychain';
 import { canUseByokProvider } from '../config';
 import { events } from '../events';
 import {
@@ -90,12 +92,53 @@ export function createByokModelList(
 
 export type ByokModelList = ReturnType<typeof createByokModelList>;
 
+/**
+ * Fork (relay): the relay's model list is fetched from the renderer, not from
+ * the native fixed-origin command. An OpenAI-compatible relay serves
+ * `GET {baseURL}/models` with a Bearer key; only sanitized ids reach the
+ * catalog, every capability field stays null (unknown, not unsupported).
+ */
+const RELAY_LIST_TIMEOUT_MS = 20_000;
+const RELAY_LIST_MAX_MODELS = 500;
+
+async function relayModelListSource(): Promise<ByokModelCatalogResponse> {
+  const baseURL = readRelayBaseURL();
+  if (!baseURL) throw new Error(MISSING_KEY);
+  const key = await byokKeychain.get('relay');
+  if (!key) throw new Error(MISSING_KEY);
+  const response = await fetch(`${baseURL}/models`, {
+    headers: { Authorization: `Bearer ${key}` },
+    signal: AbortSignal.timeout(RELAY_LIST_TIMEOUT_MS),
+  });
+  if (!response.ok) throw new Error(`relay model list failed with HTTP ${response.status}`);
+  const body = JSON.parse(await response.text()) as { data?: unknown };
+  const entries = Array.isArray(body.data) ? body.data : [];
+  const models = entries
+    .filter((entry): entry is { id: string } => {
+      if (typeof entry !== 'object' || entry === null) return false;
+      const id = (entry as { id?: unknown }).id;
+      return typeof id === 'string' && id.length > 0 && id.length <= 200;
+    })
+    .slice(0, RELAY_LIST_MAX_MODELS)
+    .map((entry) => ({
+      id: entry.id,
+      displayName: null,
+      created: null,
+      contextWindow: null,
+      maxOutputTokens: null,
+      adaptiveThinking: null,
+      efforts: null,
+      defaultEffort: null,
+    }));
+  return { models };
+}
+
 export const byokModelLists: Readonly<Record<ByokAgentProviderId, ByokModelList>> = Object.freeze(
   Object.fromEntries(BYOK_MODEL_LIST_PROVIDERS.map((provider) => [
     provider,
     createByokModelList(
       provider,
-      (id) => platform.byokModels.list(id),
+      (id) => (id === 'relay' ? relayModelListSource() : platform.byokModels.list(id)),
       setByokModelCatalog,
       () => isTauriRuntime() && canUseByokProvider(),
     ),

@@ -240,10 +240,14 @@ describe('Drifting Agent capability manifest', () => {
       'anthropic',
       'openai',
       'openai-codex',
+      // Fork: the author-owned OpenAI-compatible relay endpoint.
+      'relay',
     ]);
     expect(platform.apiKeyModelDiscovery).toMatchObject({
-      providers: ['deepseek', 'anthropic', 'openai'],
-      catalog: 'native-provider-model-endpoints-with-keychain-key;key-never-in-renderer',
+      // Fork: the relay's catalog is fetched from the renderer with the
+      // keychain key; the three bundled providers keep the native endpoints.
+      providers: ['deepseek', 'anthropic', 'openai', 'relay'],
+      catalog: 'native-provider-model-endpoints-with-keychain-key;relay-list-fetched-from-the-renderer-with-its-key',
       fallback: 'last-successful-provider-list-then-bundled-models',
       savedSelection: 'provider-shaped-id-preserved-across-restart-and-list-failure',
     });

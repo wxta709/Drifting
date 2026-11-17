@@ -562,7 +562,8 @@
         "anthropic": "供 General Agent 使用。",
         "openai": "供 General Agent 使用。",
         "openaiCodex": "通过 OpenAI 的 Codex 设备登录，用你的 ChatGPT 订阅运行 General Agent，可用模型以你的账号为准；生成设定图也用它。OpenAI 没有向第三方应用开放这条路径，可能随时失效；用量计入你的 ChatGPT 套餐。",
-        "dashscope": "仅用于语音输入转写（Qwen3-ASR）。在阿里云百炼控制台创建 API Key 后填入。"
+        "dashscope": "仅用于语音输入转写（Qwen3-ASR）。在阿里云百炼控制台创建 API Key 后填入。",
+        "relay": "供 General Agent 使用。"
       },
       "speechTitle": "语音转写",
       "speechDesc": "语音输入的转写凭据，独立于上方对话模型。转写会携带本项目的要素与设定名以纠正专有名词；请求从本机直连百炼，Key 仅存系统钥匙串。"
@@ -853,6 +854,13 @@
         "downloading": "已下载 {{done}} / {{total}}",
         "activating": "正在放进书库…"
       }
+    },
+    "relayProvider": {
+      "name": "自定义中转站 · Relay",
+      "desc": "连接你自己的 OpenAI 兼容中转站（中转 API）。填入接口地址与 API Key，请求从本机直接发往该地址。",
+      "urlPlaceholder": "https://your-relay.example.com/v1",
+      "urlLabel": "中转站接口地址",
+      "invalidURL": "接口地址无效，请填写 http(s) 开头的完整地址"
     }
   },
   "common": {
@@ -1364,7 +1372,10 @@
       "memoryTitle": "你和 Agent 共同维护的项目记忆，每次对话都会读到。",
       "manageMemory": "项目记忆",
       "noMemory": "暂无项目记忆",
-      "approveMemory": "启用"
+      "approveMemory": "启用",
+      "relayModelPlaceholder": "手动输入模型 ID",
+      "relayModelLabel": "手动输入模型 ID",
+      "relayModelUse": "使用该模型"
     },
     "memoryKind": {
       "veto": "否决",

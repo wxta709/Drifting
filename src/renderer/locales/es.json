@@ -565,7 +565,8 @@
         "anthropic": "Usado por Agent general.",
         "openai": "Usado por Agent general.",
         "openaiCodex": "Inicia sesión mediante el flujo de dispositivo Codex de OpenAI para usar Agent general con tu suscripción ChatGPT y los modelos de tu cuenta. También se usa para ilustraciones de elementos. OpenAI no ofrece un contrato para terceros en esta vía; puede dejar de funcionar sin aviso y consume tu plan ChatGPT.",
-        "dashscope": "Solo para transcripción de voz (Qwen3-ASR). Crea una clave API en la consola Alibaba Cloud Bailian."
+        "dashscope": "Solo para transcripción de voz (Qwen3-ASR). Crea una clave API en la consola Alibaba Cloud Bailian.",
+        "relay": "Lo usa el Agente general."
       },
       "speechTitle": "Transcripción de voz",
       "speechDesc": "Credencial de transcripción para entrada de voz, separada de los proveedores de chat. Incluye nombres de elementos y ambientación para corregir nombres propios. Las solicitudes van directamente a Bailian y la clave solo queda en el llavero del sistema."
@@ -856,6 +857,13 @@
         "downloading": "Descargados {{done}} de {{total}}",
         "activating": "Añadiendo a esta biblioteca…"
       }
+    },
+    "relayProvider": {
+      "name": "Relé personalizado · Relay",
+      "desc": "Conecta tu propio punto de acceso compatible con OpenAI. Introduce la URL base y la clave de API; las solicitudes van directamente desde este dispositivo a esa dirección.",
+      "urlPlaceholder": "https://your-relay.example.com/v1",
+      "urlLabel": "URL base del relé",
+      "invalidURL": "URL base no válida: usa una dirección http(s) completa"
     }
   },
   "common": {
@@ -1370,7 +1378,10 @@
       "memoryTitle": "Memoria del proyecto que mantenéis tú y Agent; todas las conversaciones la leen.",
       "manageMemory": "Memoria del proyecto",
       "noMemory": "Sin memoria del proyecto",
-      "approveMemory": "Habilitar"
+      "approveMemory": "Habilitar",
+      "relayModelPlaceholder": "Introducir ID de modelo",
+      "relayModelLabel": "ID de modelo manual",
+      "relayModelUse": "Usar este modelo"
     },
     "memoryKind": {
       "veto": "Veto",

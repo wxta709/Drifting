@@ -565,7 +565,8 @@
         "anthropic": "Usado pelo Agent geral.",
         "openai": "Usado pelo Agent geral.",
         "openaiCodex": "Entre pelo fluxo de dispositivo Codex da OpenAI para usar o Agent geral com sua assinatura ChatGPT e os modelos oferecidos à sua conta. Também é usado nas imagens de elementos. A OpenAI não oferece contrato para terceiros nessa via, que pode parar sem aviso; o uso conta no seu plano ChatGPT.",
-        "dashscope": "Usado apenas para transcrição de voz (Qwen3-ASR). Crie uma chave API no console Alibaba Cloud Bailian."
+        "dashscope": "Usado apenas para transcrição de voz (Qwen3-ASR). Crie uma chave API no console Alibaba Cloud Bailian.",
+        "relay": "Usado pelo Agente geral."
       },
       "speechTitle": "Transcrição de voz",
       "speechDesc": "Credencial de transcrição da entrada de voz, separada dos provedores de chat. Inclui nomes de elementos e ambientação do projeto para corrigir nomes próprios. Solicitações vão diretamente ao Bailian e a chave fica só no chaveiro do sistema."
@@ -856,6 +857,13 @@
         "downloading": "{{done}} de {{total}} baixados",
         "activating": "Adicionando a esta biblioteca…"
       }
+    },
+    "relayProvider": {
+      "name": "Relé personalizado · Relay",
+      "desc": "Conecte seu próprio endpoint compatível com OpenAI. Informe a URL base e a chave de API; as solicitações vão direto deste dispositivo para esse endereço.",
+      "urlPlaceholder": "https://your-relay.example.com/v1",
+      "urlLabel": "URL base do relé",
+      "invalidURL": "URL base inválida — use um endereço http(s) completo"
     }
   },
   "common": {
@@ -1370,7 +1378,10 @@
       "memoryTitle": "Memória do projeto mantida por você e pelo Agent; lida em todas as conversas.",
       "manageMemory": "Memória do projeto",
       "noMemory": "Sem memória do projeto",
-      "approveMemory": "Ativar"
+      "approveMemory": "Ativar",
+      "relayModelPlaceholder": "Inserir ID do modelo",
+      "relayModelLabel": "ID de modelo manual",
+      "relayModelUse": "Usar este modelo"
     },
     "memoryKind": {
       "veto": "Veto",

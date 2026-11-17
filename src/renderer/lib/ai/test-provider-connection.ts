@@ -10,6 +10,7 @@
 import type { BYOKProvider } from '../byok-keychain';
 import { byokKeychain } from '../byok-keychain';
 import { readEnvApiKey } from './credentials/env';
+import { readRelayBaseURL } from './relay-endpoint';
 import { canUseByokProvider } from '../config';
 import { platform } from '../../platform';
 import { buildDirectBYOKClient } from './client/build-default-client';
@@ -56,7 +57,21 @@ export async function testByokProviderConnection(
   }
 
   const model =
-    options.model?.trim() || agentProviderOption(provider).models[0]!.value;
+    options.model?.trim()
+    // Fork (relay): the bundled catalog is empty by design, so the test uses
+    // the first listed model when one exists, and demands an explicit model
+    // otherwise.
+    || (provider === 'relay'
+      ? agentProviderOption('relay').models[0]?.value ?? ''
+      : agentProviderOption(provider).models[0]!.value);
+  if (provider === 'relay' && !model) {
+    throw new AIError('invalid-input', 'Pick a relay model before testing the connection.');
+  }
+  // Fork (relay): an unset base URL must never silently fall through to the
+  // official OpenAI origin.
+  if (provider === 'relay' && !readRelayBaseURL()) {
+    throw new AIError('auth', 'The relay provider needs a base URL. Set one first.');
+  }
   const signal = options.signal ?? new AbortController().signal;
   if (!(await dependencies.hasKey(provider))) {
     throw new AIError('auth', `No ${provider} key is configured.`);

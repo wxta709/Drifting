@@ -13,7 +13,7 @@ import { useAgentMemory } from '../../usecase/useAgentMemory';
 import { requestConfirmation } from '../../store/confirmation-store';
 import { Switch } from '../../components/ui/Switch';
 import { AnchoredPopover } from '../../components/ui/AnchoredPopover';
-import { agentProviderModelOption } from '../../lib/agent/runtime/agent-provider-contract';
+import { agentProviderModelOption, isAgentModelForProvider } from '../../lib/agent/runtime/agent-provider-contract';
 import { useCodexModelCatalog } from './useCodexModelCatalog';
 import { useByokModelLists } from './useByokModelLists';
 import { useAgentProviderReadiness } from './useAgentProviderReadiness';
@@ -55,6 +55,11 @@ export function AgentComposerConfig({
 
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<'main' | 'model' | 'memory'>('main');
+  // Fork (relay): manual model entry for relays whose /models list is
+  // unavailable or incomplete.
+  const [relayModelDraft, setRelayModelDraft] = useState('');
+  const relayModelDraftValid = isAgentModelForProvider('relay', relayModelDraft.trim())
+    && relayModelDraft.trim() !== agentModel;
   const triggerRef = useRef<HTMLButtonElement>(null);
   const catalog = useCodexModelCatalog(open && view === 'model');
   useByokModelLists(open && view === 'model');
@@ -234,6 +239,41 @@ export function AgentComposerConfig({
                     </button>
                   );
                 })}
+                {provider.value === 'relay' && (
+                  <div className="agt-menu__row">
+                    <input
+                      type="text"
+                      value={relayModelDraft}
+                      autoComplete="off"
+                      spellCheck={false}
+                      className={glass ? 'ui-select glass glass--rest glass--field glass--small' : 'agt-menu__select'}
+                      placeholder={t('agentPanel.config.relayModelPlaceholder')}
+                      aria-label={t('agentPanel.config.relayModelLabel')}
+                      onChange={(event) => setRelayModelDraft(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' && relayModelDraftValid) {
+                          setAgentProvider('relay');
+                          setAgentModel(relayModelDraft.trim());
+                          setRelayModelDraft('');
+                          setView('main');
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      className={rowButtonClass}
+                      disabled={!relayModelDraftValid}
+                      onClick={() => {
+                        setAgentProvider('relay');
+                        setAgentModel(relayModelDraft.trim());
+                        setRelayModelDraft('');
+                        setView('main');
+                      }}
+                    >
+                      <span>{t('agentPanel.config.relayModelUse')}</span>
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </>

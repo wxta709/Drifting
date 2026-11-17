@@ -296,6 +296,9 @@ function requiredKey(id: AgentProviderId): string {
     // The ChatGPT subscription route has no API key; its native OAuth host
     // cannot run inside this Node canary.
     'openai-codex': [],
+    // Fork (relay): the endpoint lives in localStorage, not env; the canary
+    // does not drive it.
+    relay: [],
   };
   if (names[id].length === 0) {
     throw new Error(`Live ${id} canary is unavailable: the route has no API-key credential`);

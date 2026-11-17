@@ -563,7 +563,8 @@
         "anthropic": "供通用 Agent 使用。",
         "openai": "供通用 Agent 使用。",
         "openaiCodex": "透過 OpenAI 的 Codex 裝置登入流程，以自己的 ChatGPT 訂閱執行通用 Agent，使用帳號提供的模型；要素設定圖也會使用此連線。OpenAI 未對此途徑提供第三方服務契約，可能隨時失效，用量計入你的 ChatGPT 方案。",
-        "dashscope": "僅用於語音輸入轉錄（Qwen3-ASR）。請在阿里雲百鍊控制台建立 API 金鑰。"
+        "dashscope": "僅用於語音輸入轉錄（Qwen3-ASR）。請在阿里雲百鍊控制台建立 API 金鑰。",
+        "relay": "供 General Agent 使用。"
       },
       "speechTitle": "語音轉錄",
       "speechDesc": "語音輸入的轉錄憑證，與上方聊天服務商分開。轉錄時會附上此作品的要素與設定名稱，以校正專有名詞；請求從本裝置直接送往百鍊，金鑰僅存在系統鑰匙圈。"
@@ -854,6 +855,13 @@
         "downloading": "已下載 {{done}}／{{total}}",
         "activating": "正在加入此資料庫…"
       }
+    },
+    "relayProvider": {
+      "name": "自訂中繼站 · Relay",
+      "desc": "連線你自己的 OpenAI 相容中繼站（中轉 API）。填入介面位址與 API Key，請求從本機直接送往該位址。",
+      "urlPlaceholder": "https://your-relay.example.com/v1",
+      "urlLabel": "中繼站介面位址",
+      "invalidURL": "介面位址無效，請填寫 http(s) 開頭的完整位址"
     }
   },
   "common": {
@@ -1366,7 +1374,10 @@
       "memoryTitle": "你與 Agent 共同維護的作品記憶，每段對話都會讀取。",
       "manageMemory": "作品記憶",
       "noMemory": "尚無作品記憶",
-      "approveMemory": "啟用"
+      "approveMemory": "啟用",
+      "relayModelPlaceholder": "手動輸入模型 ID",
+      "relayModelLabel": "手動輸入模型 ID",
+      "relayModelUse": "使用該模型"
     },
     "memoryKind": {
       "veto": "禁止事項",

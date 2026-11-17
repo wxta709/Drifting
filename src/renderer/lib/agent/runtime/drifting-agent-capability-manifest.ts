@@ -423,13 +423,16 @@ export function buildDriftingAgentCapabilityManifest(): DriftingAgentCapabilityM
       },
       apiKeyModelDiscovery: {
         providers: BYOK_AGENT_PROVIDERS,
-        catalog: 'native-provider-model-endpoints-with-keychain-key;key-never-in-renderer',
+        // Fork: the three bundled providers read their lists natively with the
+        // key never entering the renderer; the relay's list is fetched from the
+        // renderer with its key (same surface as its chat calls).
+        catalog: 'native-provider-model-endpoints-with-keychain-key;relay-list-fetched-from-the-renderer-with-its-key',
         offered: 'bundled-order-first-then-newest;openai-gpt5-plus-text-models-without-snapshots-or-specialist-families',
         refresh: 'composer-menu-open-focus-online;key-change-invalidates',
         cache: 'memory-only-five-minutes-with-stale-response-fencing',
         fallback: 'last-successful-provider-list-then-bundled-models',
         savedSelection: 'provider-shaped-id-preserved-across-restart-and-list-failure',
-        unknownMetadata: 'anthropic-and-deepseek-list-limits-and-efforts;openai-ids-only-bundled-profile-or-128k-window-reasoning-on',
+        unknownMetadata: 'anthropic-and-deepseek-list-limits-and-efforts;openai-ids-only-bundled-profile-or-128k-window-reasoning-on;relay-128k-window-reasoning-off',
         acceptance: 'synthetic-list-and-native-projection-tests;live-provider-lists-unverified',
       },
       certifiedProviders: AGENT_PROVIDER_OPTIONS.map((provider) => ({

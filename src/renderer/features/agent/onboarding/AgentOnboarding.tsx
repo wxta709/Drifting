@@ -22,6 +22,7 @@ import {
   selectAgentProvider,
   type ConnectAgentProviderResult,
 } from '../../../lib/agent/connect-agent-provider';
+import { writeRelayBaseURL } from '../../../lib/ai/relay-endpoint';
 import { agentProviderModelOption } from '../../../lib/agent/runtime/agent-provider-contract';
 import { platform } from '../../../platform';
 import { useDataStore } from '../../../store/data-store';
@@ -39,6 +40,8 @@ const KEY_PROVIDERS: ReadonlyArray<{ id: BYOKProvider; name: string }> = [
   { id: 'deepseek', name: 'DeepSeek' },
   { id: 'anthropic', name: 'Anthropic' },
   { id: 'openai', name: 'OpenAI' },
+  // Fork: an OpenAI-compatible relay endpoint (中转站) the author runs.
+  { id: 'relay', name: '自定义中转站 · Relay' },
 ];
 
 type RowId = BYOKProvider | 'openai-codex';
@@ -70,6 +73,9 @@ function ConnectSection({ onConnected }: { onConnected: () => void }) {
   const [codex, setCodex] = useState<CodexSubscriptionStatus | null>(null);
   const [open, setOpen] = useState<RowId | null>(null);
   const [draft, setDraft] = useState('');
+  // Fork (relay): the endpoint's base URL is kept next to the key draft and
+  // written before the connection test reads it.
+  const [relayURL, setRelayURL] = useState('');
   const [busy, setBusy] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
 
@@ -107,6 +113,7 @@ function ConnectSection({ onConnected }: { onConnected: () => void }) {
   const toggle = (id: RowId) => {
     setFailure(null);
     setDraft('');
+    setRelayURL('');
     setOpen((current) => (current === id ? null : id));
   };
 
@@ -120,6 +127,12 @@ function ConnectSection({ onConnected }: { onConnected: () => void }) {
     if (busy || !draft.trim()) return;
     setBusy(true);
     setFailure(null);
+    // Fork (relay): the base URL is written before the connection test reads it.
+    if (provider === 'relay' && !writeRelayBaseURL(relayURL)) {
+      setBusy(false);
+      setFailure(t('settings.relayProvider.invalidURL'));
+      return;
+    }
     let result: ConnectAgentProviderResult;
     try {
       result = await connectAgentProviderKey(provider, draft);
@@ -218,11 +231,26 @@ function ConnectSection({ onConnected }: { onConnected: () => void }) {
             onClick={() => choose(id, live)}
           >
             <div className="agt-onboard__row">
+              {id === 'relay' && (
+                <label className="ui-field ui-field--sm ui-field--mono glass glass--rest glass--field agt-onboard__key">
+                  <input
+                    type="text"
+                    value={relayURL}
+                    autoFocus
+                    autoComplete="off"
+                    spellCheck={false}
+                    placeholder={t('settings.relayProvider.urlPlaceholder')}
+                    aria-label={t('settings.relayProvider.urlLabel')}
+                    onChange={(event) => setRelayURL(event.target.value)}
+                    onKeyDown={onKeyDown(id)}
+                  />
+                </label>
+              )}
               <label className="ui-field ui-field--sm ui-field--mono glass glass--rest glass--field agt-onboard__key">
                 <input
                   type="password"
                   value={draft}
-                  autoFocus
+                  autoFocus={id !== 'relay'}
                   autoComplete="off"
                   spellCheck={false}
                   placeholder={t('settings.byokProvider.keyPlaceholder')}
@@ -237,10 +265,12 @@ function ConnectSection({ onConnected }: { onConnected: () => void }) {
               </Button>
             </div>
             <div className="agt-onboard__row">
-              <Button variant="ghost" size="sm" onClick={() => void platform.material.openExternal(AGENT_PROVIDER_KEY_PAGES[id])}>
-                {t('agentPanel.onboarding.getKey')}
-                <BrushIcon name="arrow-out" size={12} />
-              </Button>
+              {AGENT_PROVIDER_KEY_PAGES[id] && (
+                <Button variant="ghost" size="sm" onClick={() => void platform.material.openExternal(AGENT_PROVIDER_KEY_PAGES[id])}>
+                  {t('agentPanel.onboarding.getKey')}
+                  <BrushIcon name="arrow-out" size={12} />
+                </Button>
+              )}
               {failure && <Failure>{failure}</Failure>}
             </div>
           </ProviderCell>

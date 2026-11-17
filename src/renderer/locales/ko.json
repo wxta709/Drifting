@@ -563,7 +563,8 @@
         "anthropic": "범용 Agent에서 사용합니다.",
         "openai": "범용 Agent에서 사용합니다.",
         "openaiCodex": "OpenAI의 Codex 기기 로그인으로 본인의 ChatGPT 구독과 계정에서 제공하는 모델을 사용해 범용 Agent를 실행합니다. 요소 이미지 생성에도 사용됩니다. OpenAI는 이 경로에 대한 제3자 계약을 제공하지 않으므로 예고 없이 중단될 수 있습니다. 사용량은 ChatGPT 요금제에 반영됩니다.",
-        "dashscope": "음성 입력 전사(Qwen3-ASR)에만 사용됩니다. Alibaba Cloud Bailian 콘솔에서 API 키를 만드세요."
+        "dashscope": "음성 입력 전사(Qwen3-ASR)에만 사용됩니다. Alibaba Cloud Bailian 콘솔에서 API 키를 만드세요.",
+        "relay": "General Agent에서 사용합니다."
       },
       "speechTitle": "음성 전사",
       "speechDesc": "위의 채팅 제공업체와 별개인 음성 입력 전사 인증 정보입니다. 고유명사 교정을 위해 작품의 요소·설정 이름을 함께 보냅니다. 요청은 기기에서 Bailian으로 직접 전송되며 키는 시스템 키체인에만 저장됩니다."
@@ -854,6 +855,13 @@
         "downloading": "{{total}}개 중 {{done}}개 다운로드",
         "activating": "라이브러리에 추가 중…"
       }
+    },
+    "relayProvider": {
+      "name": "사용자 지정 릴레이 · Relay",
+      "desc": "자신의 OpenAI 호환 릴레이 엔드포인트에 연결합니다. 베이스 URL과 API 키를 입력하면 요청이 이 기기에서 해당 주소로 직접 전송됩니다.",
+      "urlPlaceholder": "https://your-relay.example.com/v1",
+      "urlLabel": "릴레이 베이스 URL",
+      "invalidURL": "잘못된 베이스 URL입니다. http(s)로 시작하는 전체 주소를 입력하세요"
     }
   },
   "common": {
@@ -1366,7 +1374,10 @@
       "memoryTitle": "사용자와 Agent가 함께 관리하는 작품 메모리로 모든 대화에서 읽습니다.",
       "manageMemory": "작품 메모리",
       "noMemory": "작품 메모리 없음",
-      "approveMemory": "사용"
+      "approveMemory": "사용",
+      "relayModelPlaceholder": "모델 ID 직접 입력",
+      "relayModelLabel": "수동 모델 ID",
+      "relayModelUse": "이 모델 사용"
     },
     "memoryKind": {
       "veto": "금지 사항",

@@ -10,7 +10,8 @@ import type {
 export type AgentProviderId = AgentProviderChoice;
 
 /** API-key providers whose models are listed by the provider for the stored key. */
-export type ByokAgentProviderId = Extract<AgentProviderId, 'deepseek' | 'anthropic' | 'openai'>;
+/** Fork: 'relay' is the author-added OpenAI-compatible BYOK provider. */
+export type ByokAgentProviderId = Extract<AgentProviderId, 'deepseek' | 'anthropic' | 'openai' | 'relay'>;
 
 /**
  * Providers served by the native OpenAI Responses transport. `openai` bills an
@@ -189,6 +190,15 @@ export const AGENT_PROVIDER_OPTIONS: readonly AgentProviderOption[] = Object.fre
     label: 'OpenAI · ChatGPT subscription',
     models: openAIModels('responses-codex-v1'),
   },
+  {
+    // Fork: the author's own OpenAI-compatible relay (中转站). Chat
+    // Completions only with generic conservative wire profiles; models come
+    // from the relay's own /models list or manual entry, never a bundled
+    // inventory, so the offline fallback list is empty on purpose.
+    value: 'relay',
+    label: '自定义中转站 · Relay',
+    models: Object.freeze([]),
+  },
 ]);
 
 /**
@@ -221,6 +231,7 @@ const LEGACY_PROVIDER_MODELS: Readonly<Record<ByokAgentProviderId, readonly Agen
     context: profile(`gpt-5.6-${tier}:responses-v1`, 1_050_000, 128_000, 640),
     reasoning: ADAPTIVE_REASONING,
   }))),
+  relay: Object.freeze([]),
 });
 
 /** Retired ids the provider still routes to a successor; a saved choice moves with it. */
@@ -283,7 +294,7 @@ export function setCodexModelCatalog(models: readonly CodexModel[] | null): void
 const byokModels = new Map<ByokAgentProviderId, readonly AgentProviderModelOption[]>();
 
 export const BYOK_AGENT_PROVIDERS: readonly ByokAgentProviderId[] = Object.freeze([
-  'deepseek', 'anthropic', 'openai',
+  'deepseek', 'anthropic', 'openai', 'relay',
 ]);
 
 export function isByokAgentProvider(value: unknown): value is ByokAgentProviderId {
@@ -291,11 +302,14 @@ export function isByokAgentProvider(value: unknown): value is ByokAgentProviderI
 }
 
 const MODEL_ID = /^[a-zA-Z0-9._-]{1,200}$/;
+// Fork: relay ids may carry vendor prefixes (`openai/gpt-4o`, `@cf/...`).
+const RELAY_MODEL_ID = /^[a-zA-Z0-9._@/-]{1,200}$/;
 /** Ids each API-key provider can own; a saved id outside them belongs elsewhere. */
 const BYOK_MODEL_ID: Readonly<Record<ByokAgentProviderId, RegExp>> = {
   deepseek: /^deepseek-/,
   anthropic: /^claude-/,
   openai: /^gpt-\d/,
+  relay: /.*/,
 };
 /**
  * OpenAI lists every model the key can reach. The Agent speaks Responses with
@@ -311,6 +325,7 @@ const UNKNOWN_CONTEXT_TOKENS = 128_000;
 const UNKNOWN_ANTHROPIC_OUTPUT_TOKENS = 32_000;
 
 export function isAgentModelForProvider(provider: ByokAgentProviderId, id: string): boolean {
+  if (provider === 'relay') return RELAY_MODEL_ID.test(id);
   if (!MODEL_ID.test(id) || !BYOK_MODEL_ID[provider].test(id)) return false;
   if (provider !== 'openai') return true;
   const [, major] = /^gpt-(\d+)/.exec(id) ?? [];
@@ -353,8 +368,12 @@ function byokModelOption(
       ),
       reasoning: provider === 'deepseek'
         ? DEEPSEEK_REASONING
-        // Not every listed model accepts reasoning off (`none` / disabled thinking).
-        : reasoningProfile(['adaptive'], ['low', 'medium', 'high']),
+        // Fork: the relay driver is the generic no-reasoning chat-completions
+        // path, so its models never publish thinking controls.
+        : provider === 'relay'
+          ? NO_REASONING
+          // Not every listed model accepts reasoning off (`none` / disabled thinking).
+          : reasoningProfile(['adaptive'], ['low', 'medium', 'high']),
       ...(provider === 'anthropic' ? { forcedToolChoice: false } : {}),
     };
   }
@@ -473,6 +492,17 @@ export function agentProviderModelOption(
   if (isByokAgentProvider(provider) && isAgentProviderModelSelection(provider, model)) {
     return byokModelOption(provider, model);
   }
+  if (provider === 'relay') {
+    // Fork: the relay catalog can legitimately be empty (no /models list yet,
+    // no manual entry), so the usual models[0] fallback has nothing to return.
+    // A placeholder keeps the composer readable; the provider rejects an unset
+    // model explicitly when a turn is sent.
+    return option.models[0] ?? {
+      value: '', label: '', short: '',
+      context: profile('relay:agent-unset-v1', UNKNOWN_CONTEXT_TOKENS, null, 512),
+      reasoning: NO_REASONING,
+    };
+  }
   return provider === 'openai-codex' && isCodexModelSelection(model) ? {
     value: model, label: model, short: model,
     context: profile(`${model}:responses-codex-unresolved-v2`, 32_768, null, 640),
@@ -503,6 +533,11 @@ export function normalizeAgentProviderModel(
 ): string {
   const model = typeof value === 'string' ? MODEL_ALIASES[provider]?.[value] ?? value : value;
   if (isAgentProviderModelSelection(provider, model)) return model;
+  if (provider === 'relay') {
+    // Fork: the relay may have neither a listed catalog nor a valid saved id.
+    // Keep the unset model empty; the provider rejects it explicitly on send.
+    return agentProviderOption('relay').models[0]?.value ?? '';
+  }
   return agentProviderOption(provider).models[0]!.value;
 }
 
