@@ -861,7 +861,12 @@
       "desc": "Verbinde deinen eigenen OpenAI-kompatiblen Relay-Endpunkt. Basis-URL und API-Schlüssel eintragen; Anfragen gehen direkt von diesem Gerät an diese Adresse.",
       "urlPlaceholder": "https://your-relay.example.com/v1",
       "urlLabel": "Basis-URL der Relay-Station",
-      "invalidURL": "Ungültige Basis-URL — gib eine vollständige http(s)-Adresse an"
+      "invalidURL": "Ungültige Basis-URL — gib eine vollständige http(s)-Adresse an",
+      "needModel": "Noch kein Relay-Modell verfügbar — wähle oder gib zuerst im Modellmenü des Agent-Eingabefelds ein Modell und teste erneut.",
+      "refreshModels": "Modelle neu laden",
+      "refreshing": "Läuft…",
+      "modelsFetched": "{{count}} Modelle geladen",
+      "refreshEmpty": "Keine Modelle — prüfe Basis-URL und Schlüssel"
     }
   },
   "common": {

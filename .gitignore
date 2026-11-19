@@ -64,3 +64,4 @@ vendor/*/target/
 
 # Tauri iOS operator-local signing and Hosted configuration
 src-tauri/gen/apple/LocalBuild.local.xcconfig
+/target/

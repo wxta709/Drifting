@@ -10,6 +10,8 @@ import { speechKeychain } from '../../../lib/speech/speech-credentials';
 import { testByokProviderConnection } from '../../../lib/ai/test-provider-connection';
 import { readEnvApiKey } from '../../../lib/ai/credentials/env';
 import { readRelayBaseURL, writeRelayBaseURL } from '../../../lib/ai/relay-endpoint';
+import { byokModelLists } from '../../../lib/agent/byok-model-catalog';
+import { agentProviderOption } from '../../../lib/agent/runtime/agent-provider-contract';
 import { events } from '../../../lib/events';
 import { useSettingsStore } from '../../../store/settings-store';
 import {
@@ -270,6 +272,9 @@ function RelayProviderRow({ credentialsActive }: { credentialsActive: boolean })
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
+    // Fork (relay): warm the endpoint's model list so the connectivity test
+    // has a model to use even before the composer menu was ever opened.
+    void byokModelLists.relay.refresh().catch(() => undefined);
     return () => {
       cancelled = true;
     };
@@ -283,8 +288,21 @@ function RelayProviderRow({ credentialsActive }: { credentialsActive: boolean })
     setTestState('testing');
     setTestMsg('');
     try {
+      // The composer's current model when it points at the relay; otherwise
+      // the first model the relay's own list offers, refreshing the list
+      // first so a freshly saved URL/key is honored.
+      let model = agentProvider === 'relay' ? agentModel.trim() : '';
+      if (!model) {
+        await byokModelLists.relay.refresh(true);
+        model = agentProviderOption('relay').models[0]?.value ?? '';
+      }
+      if (!model) {
+        setTestState('fail');
+        setTestMsg(t('settings.relayProvider.needModel'));
+        return;
+      }
       await testByokProviderConnection('relay', {
-        ...(agentProvider === 'relay' ? { model: agentModel } : {}),
+        model,
         signal: new AbortController().signal,
       });
       setTestState('ok');
@@ -296,6 +314,25 @@ function RelayProviderRow({ credentialsActive }: { credentialsActive: boolean })
           : t('settings.byokProvider.requestFailed'),
       );
     }
+  };
+
+  // Fork (relay): explicit re-fetch of the endpoint's /models list, with a
+  // count confirmation so a wrong URL or key is visible right here.
+  const [refreshState, setRefreshState] = useState<'idle' | 'refreshing' | 'done'>('idle');
+  const [refreshMsg, setRefreshMsg] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null);
+
+  const refreshModels = async () => {
+    if (!connected || refreshState === 'refreshing') return;
+    setRefreshState('refreshing');
+    setRefreshMsg(null);
+    await byokModelLists.relay.refresh(true).catch(() => undefined);
+    const count = agentProviderOption('relay').models.length;
+    if (count > 0) {
+      setRefreshMsg({ tone: 'ok', text: t('settings.relayProvider.modelsFetched', { count: String(count) }) });
+    } else {
+      setRefreshMsg({ tone: 'error', text: t('settings.relayProvider.refreshEmpty') });
+    }
+    setRefreshState('done');
   };
 
   const save = async () => {
@@ -366,11 +403,17 @@ function RelayProviderRow({ credentialsActive }: { credentialsActive: boolean })
                 ? t('settings.byokProvider.testing')
                 : t('settings.common.test_connection')}
             </SettingsButton>
+            <SettingsButton size="sm" onClick={refreshModels} disabled={refreshState === 'refreshing'}>
+              {refreshState === 'refreshing'
+                ? t('settings.relayProvider.refreshing')
+                : t('settings.relayProvider.refreshModels')}
+            </SettingsButton>
             <SettingsButton variant="ghost" size="sm" onClick={startEditing}>
               {t('settings.byokProvider.editKey')}
             </SettingsButton>
             {testState === 'ok' && <ProviderResult tone="ok">{t('settings.byokProvider.available')}</ProviderResult>}
             {testState === 'fail' && <ProviderResult tone="error">{testMsg}</ProviderResult>}
+            {refreshMsg && <ProviderResult tone={refreshMsg.tone}>{refreshMsg.text}</ProviderResult>}
             <span style={{ flex: 1 }} />
             <SettingsButton variant="danger" size="sm" onClick={disconnect}>
               {t('settings.common.disconnect')}

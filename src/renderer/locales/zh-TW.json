@@ -861,7 +861,12 @@
       "desc": "連線你自己的 OpenAI 相容中繼站（中轉 API）。填入介面位址與 API Key，請求從本機直接送往該位址。",
       "urlPlaceholder": "https://your-relay.example.com/v1",
       "urlLabel": "中繼站介面位址",
-      "invalidURL": "介面位址無效，請填寫 http(s) 開頭的完整位址"
+      "invalidURL": "介面位址無效，請填寫 http(s) 開頭的完整位址",
+      "needModel": "還沒有可用的中繼站模型——請先在 Agent 輸入框的模型選單中選擇或手動輸入一個模型，再測試連線。",
+      "refreshModels": "重新取得模型",
+      "refreshing": "正在取得…",
+      "modelsFetched": "已取得 {{count}} 個模型",
+      "refreshEmpty": "未取得任何模型——請檢查介面位址與金鑰"
     }
   },
   "common": {

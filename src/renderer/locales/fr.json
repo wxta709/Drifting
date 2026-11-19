@@ -863,7 +863,12 @@
       "desc": "Connectez votre propre point de terminaison compatible OpenAI. Saisissez l’URL de base et la clé API ; les requêtes partent directement de cet appareil vers cette adresse.",
       "urlPlaceholder": "https://your-relay.example.com/v1",
       "urlLabel": "URL de base du relais",
-      "invalidURL": "URL de base invalide — utilisez une adresse http(s) complète"
+      "invalidURL": "URL de base invalide — utilisez une adresse http(s) complète",
+      "needModel": "Aucun modèle de relais disponible — choisissez ou saisissez-en un dans le menu de modèles du composeur de l’agent, puis retestez.",
+      "refreshModels": "Récupérer les modèles",
+      "refreshing": "Récupération…",
+      "modelsFetched": "{{count}} modèles récupérés",
+      "refreshEmpty": "Aucun modèle — vérifiez l’URL de base et la clé"
     }
   },
   "common": {

@@ -861,7 +861,12 @@
       "desc": "Connect an OpenAI-compatible relay endpoint of your own. Enter the API base URL and key; requests go directly from this device to that address.",
       "urlPlaceholder": "https://your-relay.example.com/v1",
       "urlLabel": "Relay API base URL",
-      "invalidURL": "Invalid base URL — use a full http(s) address"
+      "invalidURL": "Invalid base URL — use a full http(s) address",
+      "needModel": "No relay model available yet — pick or enter one in the Agent composer model menu, then test again.",
+      "refreshModels": "Refresh models",
+      "refreshing": "Fetching…",
+      "modelsFetched": "Fetched {{count}} models",
+      "refreshEmpty": "No models returned — check the base URL and key"
     }
   },
   "common": {

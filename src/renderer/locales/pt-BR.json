@@ -863,7 +863,12 @@
       "desc": "Conecte seu próprio endpoint compatível com OpenAI. Informe a URL base e a chave de API; as solicitações vão direto deste dispositivo para esse endereço.",
       "urlPlaceholder": "https://your-relay.example.com/v1",
       "urlLabel": "URL base do relé",
-      "invalidURL": "URL base inválida — use um endereço http(s) completo"
+      "invalidURL": "URL base inválida — use um endereço http(s) completo",
+      "needModel": "Ainda não há modelo de relé disponível — escolha ou insira um no menu de modelos do compositor do Agente e teste novamente.",
+      "refreshModels": "Recarregar modelos",
+      "refreshing": "Buscando…",
+      "modelsFetched": "{{count}} modelos obtidos",
+      "refreshEmpty": "Nenhum modelo — verifique a URL base e a chave"
     }
   },
   "common": {

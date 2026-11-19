@@ -861,7 +861,12 @@
       "desc": "自分の OpenAI 互換中継エンドポイントに接続します。ベース URL と API キーを入力すると、リクエストはこの端末からそのアドレスへ直接送信されます。",
       "urlPlaceholder": "https://your-relay.example.com/v1",
       "urlLabel": "中継のベース URL",
-      "invalidURL": "ベース URL が無効です。http(s) で始まる完全なアドレスを入力してください"
+      "invalidURL": "ベース URL が無効です。http(s) で始まる完全なアドレスを入力してください",
+      "needModel": "利用できる中継モデルがまだありません。Agent 入力欄のモデルメニューで選択または入力してから、再度テストしてください。",
+      "refreshModels": "モデルを再取得",
+      "refreshing": "取得中…",
+      "modelsFetched": "{{count}} 件のモデルを取得",
+      "refreshEmpty": "モデルが取得できません——ベース URL とキーを確認してください"
     }
   },
   "common": {
