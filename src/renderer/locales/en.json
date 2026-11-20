@@ -866,7 +866,8 @@
       "refreshModels": "Refresh models",
       "refreshing": "Fetching…",
       "modelsFetched": "Fetched {{count}} models",
-      "refreshEmpty": "No models returned — check the base URL and key"
+      "refreshEmpty": "No models returned — check the base URL and key",
+      "modelLabel": "Relay test model"
     }
   },
   "common": {

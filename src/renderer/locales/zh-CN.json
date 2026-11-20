@@ -865,7 +865,8 @@
       "refreshModels": "重新获取模型",
       "refreshing": "正在获取…",
       "modelsFetched": "已获取 {{count}} 个模型",
-      "refreshEmpty": "未获取到任何模型——请检查接口地址与密钥"
+      "refreshEmpty": "未获取到任何模型——请检查接口地址与密钥",
+      "modelLabel": "中转站测试模型"
     }
   },
   "common": {

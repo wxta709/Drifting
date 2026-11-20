@@ -866,7 +866,8 @@
       "refreshModels": "모델 다시 가져오기",
       "refreshing": "가져오는 중…",
       "modelsFetched": "모델 {{count}}개를 가져왔습니다",
-      "refreshEmpty": "가져온 모델이 없습니다. 베이스 URL과 키를 확인하세요"
+      "refreshEmpty": "가져온 모델이 없습니다. 베이스 URL과 키를 확인하세요",
+      "modelLabel": "릴레이 테스트 모델"
     }
   },
   "common": {

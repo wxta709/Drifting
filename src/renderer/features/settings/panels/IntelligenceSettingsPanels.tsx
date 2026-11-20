@@ -283,15 +283,30 @@ function RelayProviderRow({ credentialsActive }: { credentialsActive: boolean })
   const [testState, setTestState] = useState<'idle' | 'testing' | 'ok' | 'fail'>('idle');
   const [testMsg, setTestMsg] = useState('');
 
+  // Fork (relay): the author picks which model the connectivity test runs
+  // against — the relay's fetched catalog, the Agent's current selection, or a
+  // manually entered id; the first listed model is only a fallback.
+  const [testModel, setTestModel] = useState('');
+  const listedModels = agentProviderOption('relay').models;
+  const composerModel = agentProvider === 'relay' ? agentModel.trim() : '';
+  const selectedTestModel = testModel
+    || (composerModel ? composerModel : '')
+    || listedModels[0]?.value
+    || '';
+  const testModelOptions = listedModels.some((model) => model.value === selectedTestModel)
+    ? listedModels
+    : selectedTestModel
+      ? [{ value: selectedTestModel, label: selectedTestModel }, ...listedModels]
+      : listedModels;
+
   const testConnection = async () => {
     if (!connected) return;
     setTestState('testing');
     setTestMsg('');
     try {
-      // The composer's current model when it points at the relay; otherwise
-      // the first model the relay's own list offers, refreshing the list
-      // first so a freshly saved URL/key is honored.
-      let model = agentProvider === 'relay' ? agentModel.trim() : '';
+      // The dropdown choice; without one, refresh the relay's own list and
+      // take its first model so a freshly saved URL/key is honored.
+      let model = selectedTestModel;
       if (!model) {
         await byokModelLists.relay.refresh(true);
         model = agentProviderOption('relay').models[0]?.value ?? '';
@@ -398,7 +413,24 @@ function RelayProviderRow({ credentialsActive }: { credentialsActive: boolean })
           </>
         ) : connected ? (
           <>
-            <SettingsButton size="sm" onClick={testConnection} disabled={testState === 'testing'}>
+            <label className="ui-select glass glass--rest glass--field glass--small">
+              <select
+                value={selectedTestModel}
+                onChange={(event) => setTestModel(event.target.value)}
+                aria-label={t('settings.relayProvider.modelLabel')}
+                disabled={testModelOptions.length === 0}
+              >
+                {testModelOptions.length === 0 && (
+                  <option value="">{t('settings.relayProvider.modelLabel')}</option>
+                )}
+                {testModelOptions.map((model) => (
+                  <option key={model.value} value={model.value}>
+                    {model.label || model.value}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <SettingsButton size="sm" onClick={testConnection} disabled={testState === 'testing' || !selectedTestModel}>
               {testState === 'testing'
                 ? t('settings.byokProvider.testing')
                 : t('settings.common.test_connection')}

@@ -866,7 +866,8 @@
       "refreshModels": "モデルを再取得",
       "refreshing": "取得中…",
       "modelsFetched": "{{count}} 件のモデルを取得",
-      "refreshEmpty": "モデルが取得できません——ベース URL とキーを確認してください"
+      "refreshEmpty": "モデルが取得できません——ベース URL とキーを確認してください",
+      "modelLabel": "中継テストモデル"
     }
   },
   "common": {

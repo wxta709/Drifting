@@ -866,7 +866,8 @@
       "refreshModels": "Modelle neu laden",
       "refreshing": "Läuft…",
       "modelsFetched": "{{count}} Modelle geladen",
-      "refreshEmpty": "Keine Modelle — prüfe Basis-URL und Schlüssel"
+      "refreshEmpty": "Keine Modelle — prüfe Basis-URL und Schlüssel",
+      "modelLabel": "Relay-Testmodell"
     }
   },
   "common": {
