@@ -48,6 +48,10 @@ pub struct RelayChatRequestInput {
 pub enum RelayStreamEvent {
     Started {
         status: u16,
+        /// The upstream response's content type, so the SDK parses JSON
+        /// (non-streaming calls) and SSE (streaming calls) correctly.
+        #[serde(rename = "contentType")]
+        content_type: Option<String>,
         #[serde(rename = "errorCode")]
         error_code: Option<String>,
         #[serde(rename = "errorMessage")]
@@ -280,6 +284,7 @@ async fn execute(
             &on_event,
             RelayStreamEvent::Started {
                 status: status.as_u16(),
+                content_type: None,
                 error_code: Some(format!("RELAY_HTTP_{}", status.as_u16())),
                 error_message: Some(message),
             },
@@ -288,10 +293,16 @@ async fn execute(
         return Ok(());
     }
 
+    let content_type = response
+        .headers()
+        .get(CONTENT_TYPE)
+        .and_then(|value| value.to_str().ok())
+        .map(str::to_owned);
     send_event(
         &on_event,
         RelayStreamEvent::Started {
             status: status.as_u16(),
+            content_type,
             error_code: None,
             error_message: None,
         },

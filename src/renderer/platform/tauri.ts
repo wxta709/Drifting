@@ -436,7 +436,11 @@ function nativeRelayResponse(
         return;
       }
       started = true;
-      const headers = new Headers({ 'content-type': 'text/event-stream' });
+      // Keep the upstream content type: the SDK parses JSON for `stream:false`
+      // calls (the connectivity test) and SSE for streaming calls.
+      const headers = new Headers({
+        'content-type': event.contentType || 'text/event-stream',
+      });
       if (event.errorCode) headers.set('x-drifting-relay-error-code', event.errorCode);
       if (event.errorMessage) headers.set('x-drifting-relay-error-message', event.errorMessage);
       settled = true;

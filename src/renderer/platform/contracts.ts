@@ -429,6 +429,8 @@ export type RelayStreamEvent =
   | {
       type: 'started';
       status: number;
+      /** Upstream content type, so JSON vs SSE parsing follows the response. */
+      contentType: string | null;
       errorCode: string | null;
       errorMessage: string | null;
     }
