@@ -414,6 +414,36 @@ export interface OpenAIResponsesRequestInput {
   credentialSource?: OpenAIResponsesCredentialSource;
 }
 
+/** Fork (relay): native OpenAI-compatible chat streaming request. */
+export interface RelayChatRequestInput {
+  /** Transport-only cancellation identity. */
+  requestId: string;
+  /** The author's relay base URL (https, or http on loopback). */
+  baseUrl: string;
+  /** Chat Completions JSON body. Authorization is injected by native code. */
+  body: string;
+  timeoutMs: number;
+}
+
+export type RelayStreamEvent =
+  | {
+      type: 'started';
+      status: number;
+      errorCode: string | null;
+      errorMessage: string | null;
+    }
+  | { type: 'chunk'; bytes: number[] | Uint8Array }
+  | { type: 'finished' };
+
+/** Fork (relay): one model id projected from the relay's /models list. */
+export interface RelayModelEntry {
+  id: string;
+}
+
+export interface RelayModelListResponse {
+  models: RelayModelEntry[];
+}
+
 export type CodexLoginPhase =
   | 'awaiting_authorization'
   | 'exchanging'
@@ -815,6 +845,13 @@ export interface TauriCommandContract {
     result: void;
   };
   openai_responses_cancel: { args: { requestId: string }; result: boolean };
+  // Fork (relay): native transport; the relay key never enters JS.
+  relay_models_list: { args: { baseUrl: string }; result: RelayModelListResponse };
+  relay_chat_stream: {
+    args: { input: RelayChatRequestInput; onEvent: unknown };
+    result: void;
+  };
+  relay_chat_cancel: { args: { requestId: string }; result: boolean };
   codex_oauth_start: { args: undefined; result: CodexLoginProjection };
   codex_oauth_status: { args: undefined; result: CodexSubscriptionStatus };
   codex_models_list: { args: undefined; result: CodexModelCatalogResponse };

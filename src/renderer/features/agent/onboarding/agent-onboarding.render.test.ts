@@ -31,11 +31,12 @@ describe('the Agent panel first run', () => {
     const html = renderToStaticMarkup(createElement(AgentOnboarding, { view: 'connect', onPick: () => undefined }));
     expect(html).toContain('data-agent-onboarding="connect"');
     expect(html).toContain('agentPanel.onboarding.connect');
-    for (const provider of ['openai-codex', 'deepseek', 'anthropic', 'openai']) {
+    // Fork: 'relay' joins the provider rows (custom OpenAI-compatible endpoint).
+    for (const provider of ['openai-codex', 'deepseek', 'anthropic', 'openai', 'relay']) {
       expect(html).toContain(`data-provider="${provider}"`);
     }
-    expect(html.match(/kind-mark--hollow/g)).toHaveLength(4);
-    expect(html.match(/agt-onboard__cell glass glass--surface/g)).toHaveLength(4);
+    expect(html.match(/kind-mark--hollow/g)).toHaveLength(5);
+    expect(html.match(/agt-onboard__cell glass glass--surface/g)).toHaveLength(5);
     // Rows open on a click; nothing asks for a key before that.
     expect(html).not.toContain('type="password"');
   });

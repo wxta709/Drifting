@@ -36,6 +36,8 @@ mod markdown_share;
 mod mcp_stdio;
 mod native_capabilities;
 mod openai_responses;
+// Fork: native transport for the author's OpenAI-compatible relay (中转站).
+mod relay_api;
 mod secure_storage;
 mod state;
 mod sync_asset_store;
@@ -238,6 +240,7 @@ pub fn run() {
         .manage(mcp_server::McpServerState::default())
         .manage(mcp_stdio::McpStdioState::default())
         .manage(openai_responses::OpenAIResponsesState::default())
+        .manage(relay_api::RelayApiState::default())
         .manage(codex_oauth::CodexOAuthState::default())
         .manage(codex_images::CodexImagesState::default())
         .manage(native_capabilities::AssetImportSession::default())
@@ -285,6 +288,9 @@ pub fn run() {
             mcp_stdio::mcp_stdio_status,
             openai_responses::openai_responses_stream,
             openai_responses::openai_responses_cancel,
+            relay_api::relay_models_list,
+            relay_api::relay_chat_stream,
+            relay_api::relay_chat_cancel,
             codex_oauth::codex_oauth_start,
             codex_oauth::codex_oauth_status,
             codex_models::codex_models_list,

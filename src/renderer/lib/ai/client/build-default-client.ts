@@ -11,6 +11,7 @@ import { BYOKCredentialsProvider } from '../credentials/byok';
 import { EnvCredentialsProvider } from '../credentials/env';
 import { ChainCredentialsProvider } from '../credentials/chain';
 import { readRelayBaseURL } from '../relay-endpoint';
+import { createRelayFetch } from '../relay-native-fetch';
 import { LoggingInterceptor } from '../interceptors/logging-interceptor';
 import { CaptureInterceptor } from '../interceptors/capture-interceptor';
 import type { LLMProvider } from './providers/provider';
@@ -77,13 +78,17 @@ function createDirectProvider(provider: BYOKProvider, apiKey: string, model?: st
         apiKey,
         ...(model ? { defaultModel: model } : {}),
       });
-    case 'relay':
+    case 'relay': {
+      const baseURL = readRelayBaseURL();
       return new OpenAIProvider({
         apiKey,
         ...(model ? { defaultModel: model } : {}),
-        baseURL: readRelayBaseURL(),
+        baseURL,
         omitReasoningEffort: true,
+        // Fork: relay gateways reject CORS preflights — go through native.
+        fetchImpl: createRelayFetch(baseURL),
       });
+    }
   }
 }
 
@@ -178,6 +183,8 @@ async function buildDirectRelayClient(
       ...(options.model ? { defaultModel: options.model } : {}),
       baseURL,
       omitReasoningEffort: true,
+      // Fork: relay gateways reject CORS preflights — go through native.
+      fetchImpl: createRelayFetch(baseURL),
     }),
     options.logTag ?? 'general-agent-relay',
   );

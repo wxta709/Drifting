@@ -23,6 +23,11 @@ export interface OpenAIProviderConfig {
    * backends vary; a strict one may reject the OpenAI-only parameter.
    */
   omitReasoningEffort?: boolean;
+  /**
+   * Fork (relay): replace the SDK's fetch. The relay client passes a native
+   * transport adapter because relay gateways reject CORS preflights.
+   */
+  fetchImpl?: typeof fetch;
 }
 
 /** OpenAI Chat Completions adapter with strict Agent terminal accounting. */
@@ -39,6 +44,7 @@ export class OpenAIProvider implements LLMProvider {
     this.client = new OpenAI({
       apiKey: config.apiKey,
       ...(config.baseURL ? { baseURL: config.baseURL } : {}),
+      ...(config.fetchImpl ? { fetch: config.fetchImpl } : {}),
       dangerouslyAllowBrowser: true,
     });
     this.defaultModel = config.defaultModel ?? defaultAgentProviderModel('openai');

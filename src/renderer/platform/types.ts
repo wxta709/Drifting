@@ -41,6 +41,7 @@ import type {
   OpenResult,
   PickFileResult,
   PlatformCapabilities,
+  RelayModelListResponse,
   PrepareImageOptions,
   PrepareImageResult,
   SystemFontFamily,
@@ -322,6 +323,17 @@ export interface OpenAIResponsesPlatformApi {
 }
 
 /**
+ * Fork (relay): native transport for the author's OpenAI-compatible relay.
+ * Relay gateways do not answer CORS preflights, so chat and model-list
+ * requests run natively; the `byok.relay` key replaces the Authorization
+ * header inside the Rust host and never enters JS.
+ */
+export interface RelayPlatformApi {
+  listModels(baseURL: string): Promise<RelayModelListResponse>;
+  request(body: string, baseURL: string, signal: AbortSignal): Promise<Response>;
+}
+
+/**
  * Experimental ChatGPT subscription route. The OAuth tokens live only in
  * native secure storage; the renderer drives sign-in and reads status.
  */
@@ -418,6 +430,8 @@ export interface PlatformApi {
   readonly mcpStdio: McpStdioPlatformApi;
   readonly mcpHttp: McpHttpPlatformApi;
   readonly openAIResponses: OpenAIResponsesPlatformApi;
+  /** Fork (relay): native transport for the author's relay endpoint. */
+  readonly relayApi: RelayPlatformApi;
   readonly codexSubscription: CodexSubscriptionPlatformApi;
   readonly byokModels: ByokModelsPlatformApi;
   readonly imageGeneration: ImageGenerationPlatformApi;

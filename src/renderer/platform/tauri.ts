@@ -16,6 +16,7 @@ import type {
   NativePlatformCapabilities,
   OpenAIResponsesCredentialSource,
   OpenAIResponsesStreamEvent,
+  RelayStreamEvent,
   PlatformCapabilities,
   PrepareImageResult,
   TauriCommandArgs,
@@ -368,6 +369,98 @@ function nativeOpenAIResponse(
   signal.addEventListener('abort', onAbort, { once: true });
   void invokeContract('openai_responses_stream', {
     input: { requestId, body, timeoutMs: 600_000, credentialSource },
+    onEvent,
+  }).catch(fail);
+  return response;
+}
+
+/**
+ * Fork (relay): fetch-shaped response over the native relay transport. The
+ * relay gateways this fork targets do not answer CORS preflights, so the
+ * OpenAI SDK's fetch is replaced with this adapter for relay providers.
+ */
+function nativeRelayResponse(
+  body: string,
+  baseURL: string,
+  signal: AbortSignal,
+): Promise<Response> {
+  requireTauriRuntime('relay_chat_stream');
+  if (signal.aborted) return Promise.reject(abortException());
+
+  const requestId = `relay-${globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`}`;
+  let streamController!: ReadableStreamDefaultController<Uint8Array>;
+  let started = false;
+  let finished = false;
+  let settled = false;
+  let resolveStart!: (response: Response) => void;
+  let rejectStart!: (error: unknown) => void;
+
+  const cleanup = () => signal.removeEventListener('abort', onAbort);
+  const fail = (error: unknown) => {
+    if (finished) return;
+    finished = true;
+    cleanup();
+    if (!settled) {
+      settled = true;
+      rejectStart(error);
+    } else {
+      streamController.error(error);
+    }
+  };
+  const cancelNative = () => {
+    void invokeContract('relay_chat_cancel', { requestId }).catch(() => undefined);
+  };
+  const onAbort = () => {
+    cancelNative();
+    fail(abortException());
+  };
+  const stream = new ReadableStream<Uint8Array>({
+    start(controller) {
+      streamController = controller;
+    },
+    cancel() {
+      finished = true;
+      cancelNative();
+      cleanup();
+    },
+  });
+  const response = new Promise<Response>((resolve, reject) => {
+    resolveStart = resolve;
+    rejectStart = reject;
+  });
+  const onEvent = new Channel<RelayStreamEvent>((event) => {
+    if (finished) return;
+    if (event.type === 'started') {
+      if (started) {
+        fail(new PlatformCommandError('relay_chat_stream', 'duplicate start event'));
+        return;
+      }
+      started = true;
+      const headers = new Headers({ 'content-type': 'text/event-stream' });
+      if (event.errorCode) headers.set('x-drifting-relay-error-code', event.errorCode);
+      if (event.errorMessage) headers.set('x-drifting-relay-error-message', event.errorMessage);
+      settled = true;
+      resolveStart(new Response(stream, { status: event.status, headers }));
+      return;
+    }
+    if (!started) {
+      fail(new PlatformCommandError('relay_chat_stream', 'stream data preceded start'));
+      return;
+    }
+    if (event.type === 'chunk') {
+      streamController.enqueue(
+        event.bytes instanceof Uint8Array ? event.bytes : Uint8Array.from(event.bytes),
+      );
+      return;
+    }
+    finished = true;
+    cleanup();
+    streamController.close();
+  });
+
+  signal.addEventListener('abort', onAbort, { once: true });
+  void invokeContract('relay_chat_stream', {
+    input: { requestId, baseUrl: baseURL, body, timeoutMs: 600_000 },
     onEvent,
   }).catch(fail);
   return response;
@@ -903,6 +996,11 @@ export const tauriPlatform: PlatformApi = {
 
   openAIResponses: {
     request: (body, signal) => nativeOpenAIResponse(body, signal, 'api_key'),
+  },
+
+  relayApi: {
+    listModels: (baseURL) => invokeContract('relay_models_list', { baseUrl: baseURL }),
+    request: (body, baseURL, signal) => nativeRelayResponse(body, baseURL, signal),
   },
 
   codexSubscription: {
