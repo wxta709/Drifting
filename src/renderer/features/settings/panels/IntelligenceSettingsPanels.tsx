@@ -21,6 +21,7 @@ import {
   SettingsSectionHeader,
   type SettingsRegisterRef,
 } from '../SettingsPrimitives';
+import { GlassSelect } from '../../../components/ui/GlassSelect';
 import { BrushIcon } from '../../../components/ui/BrushIcon';
 
 /**
@@ -413,23 +414,19 @@ function RelayProviderRow({ credentialsActive }: { credentialsActive: boolean })
           </>
         ) : connected ? (
           <>
-            <label className="ui-select glass glass--rest glass--field glass--small">
-              <select
-                value={selectedTestModel}
-                onChange={(event) => setTestModel(event.target.value)}
-                aria-label={t('settings.relayProvider.modelLabel')}
+            <div style={{ width: 250, flex: '0 0 auto' }}>
+              <GlassSelect
+                value={selectedTestModel || null}
+                options={testModelOptions.map((model) => ({
+                  value: model.value,
+                  label: model.label || model.value,
+                }))}
+                onChange={(next) => setTestModel(next)}
+                ariaLabel={t('settings.relayProvider.modelLabel')}
+                placeholder={t('settings.relayProvider.modelLabel')}
                 disabled={testModelOptions.length === 0}
-              >
-                {testModelOptions.length === 0 && (
-                  <option value="">{t('settings.relayProvider.modelLabel')}</option>
-                )}
-                {testModelOptions.map((model) => (
-                  <option key={model.value} value={model.value}>
-                    {model.label || model.value}
-                  </option>
-                ))}
-              </select>
-            </label>
+              />
+            </div>
             <SettingsButton size="sm" onClick={testConnection} disabled={testState === 'testing' || !selectedTestModel}>
               {testState === 'testing'
                 ? t('settings.byokProvider.testing')
